@@ -6,7 +6,11 @@ function HomeView() {
   return (
     <Layout>
       <div className={s.containerFilter}>
-        <InputSelectPrimary placeholder="Search" />
+        <InputSelectPrimary
+          list={["amskfmksafmksmakfmksa", "mksamfksmakf", "sfmdskfm"]}
+          placeholder="Search"
+          multipleSelect={true}
+        />
       </div>
     </Layout>
   );
