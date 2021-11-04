@@ -5,6 +5,7 @@ import { store } from "./store/store";
 import { Provider } from "react-redux";
 import { BrowserRouter, Switch, Route } from "react-router-dom";
 import ToggleThemeButton from "./components/input/button/toggleTheme/ToggleThemeButton";
+import "./declares";
 
 ReactDOM.render(
   <Provider store={store}>
