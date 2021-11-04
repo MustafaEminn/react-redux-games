@@ -1,43 +1,54 @@
-.inputContainer {
-  position: relative;
-  display: flex;
-  align-items: center;
-  width: auto;
+.container {
+  --width: 15rem;
+  --height: 2.2rem;
   height: 100%;
-  .input {
+  width: var(--width);
+  position: relative;
+  overflow: hidden;
+  .inputContainer {
+    position: relative;
     display: flex;
     align-items: center;
-    border-radius: 7px;
-    border: 2px solid var(--main);
-    height: 2.2rem;
-    width: 15rem;
-    padding-left: 10px;
-    padding-right: 30px;
-    transition: border 0.1s;
-    color: var(--black);
-    font-size: 16px;
-
-    &:focus {
-      border: 2px solid var(--black);
-    }
-
-    &::placeholder {
-      font-size: 1rem;
-    }
-  }
-
-  & .inputSuffixIcon {
-    position: absolute;
-    right: 10px;
+    width: auto;
+    height: var(--height);
+    width: var(--width);
     z-index: 2;
+    background: var(--white);
+    .input {
+      display: flex;
+      align-items: center;
+      border-radius: 7px;
+      border: 2px solid var(--main);
+      padding-left: 10px;
+      padding-right: 30px;
+      transition: border 0.1s;
+      color: var(--black);
+      font-size: 16px;
+      height: 100%;
+      width: 100%;
 
-    & svg {
-      width: 1.125rem;
-      height: 0.625rem;
+      &:focus {
+        border: 2px solid var(--black);
+      }
+
+      &::placeholder {
+        font-size: 1rem;
+      }
     }
 
-    & path {
-      fill: var(--black);
+    & .inputSuffixIcon {
+      position: absolute;
+      right: 10px;
+      z-index: 2;
+
+      & svg {
+        width: 1.125rem;
+        height: 0.625rem;
+      }
+
+      & path {
+        fill: var(--black);
+      }
     }
   }
 }
