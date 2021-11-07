@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 
-import { Select, Form, Row, Col, Button, Card } from "antd";
+import { Select, Form, Row, Col, Button, Card, Spin, Space } from "antd";
 import {
   ArrowRightOutlined,
   HeartFilled,
-  MoreOutlined,
+  LoadingOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 
@@ -14,7 +14,6 @@ import axios from "axios";
 import { BASE } from "../../config/base";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import Item from "antd/lib/list/Item";
 
 interface IDatas {
   id: number;
@@ -43,9 +42,10 @@ function HomeView() {
     JSON.parse(localStorage.favorites) || []
   );
   const [pageLoading, setPageLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const Option = Select.Option;
-  const [form] = Form.useForm();
+  const [filterForm] = Form.useForm();
 
   const categories = [
     "Mmorpg",
@@ -95,10 +95,6 @@ function HomeView() {
     "Mmorts",
   ];
 
-  const onFilter = () => {
-    let values = form.getFieldsValue();
-  };
-
   const concatDataAndFavorites = (
     datasArg: Array<IDatas>,
     favoritesArg: Array<IFavorites>
@@ -116,6 +112,47 @@ function HomeView() {
       return { ...itemData, isFavorite: isGameAddedToFavorite };
     });
     return newDataWithFavorites;
+  };
+
+  const onFilter = () => {
+    let values = filterForm.getFieldsValue();
+    if (!values.platform && !values.sort && !values.category) {
+      toast.info("Please enter filter.");
+      return;
+    }
+    setLoading(true);
+
+    let requestParams: any = {};
+
+    let addToParams = (params: Array<string> | string, paramsName: string) => {
+      if (typeof params === "string") {
+        requestParams[paramsName] = params;
+      } else {
+        requestParams[paramsName] = params.join(".");
+      }
+    };
+
+    values.platform && addToParams(values.platform, "platform");
+    values.category && addToParams(values.category, "tag");
+    values.sort && addToParams(values.sort, "sort-by");
+
+    axios
+      .get(BASE.GAMES_API_URL, { params: requestParams })
+      .then((res) => {
+        let newDataWithFavorites = concatDataAndFavorites(
+          res.data as Array<IDatas>,
+          favorites
+        );
+        setDatas(newDataWithFavorites);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error(
+          "We got error when data fetching. Please try again the search."
+        );
+        setLoading(false);
+      });
   };
 
   useEffect(() => {
@@ -180,7 +217,7 @@ function HomeView() {
     <Layout loading={pageLoading}>
       <Form
         onFinish={() => onFilter()}
-        form={form}
+        form={filterForm}
         layout="vertical"
         className={s.containerForm}
       >
@@ -190,7 +227,6 @@ function HomeView() {
             <Form.Item name="platform" label="Select platform">
               <Select
                 showSearch
-                mode="multiple"
                 className={s.containerFilter_inputSearchFilter}
                 placeholder="Select platform"
                 optionFilterProp="children"
@@ -254,7 +290,7 @@ function HomeView() {
               >
                 <Option value="release-date">Release date</Option>
                 <Option value="popularity">Popularity</Option>
-                <Option value="alphabetical ">Alphabetical </Option>
+                <Option value="alphabetical">Alphabetical </Option>
                 <Option value="relevance">Relevance</Option>
               </Select>
             </Form.Item>
@@ -266,6 +302,7 @@ function HomeView() {
               type="primary"
               icon={<SearchOutlined />}
               htmlType="submit"
+              loading={loading}
             >
               Search
             </Button>
@@ -273,64 +310,79 @@ function HomeView() {
         </Row>
       </Form>
 
-      <Row gutter={[16, 16]} className={s.cardsContainer} justify="center" wrap>
-        {datas &&
-          datas.map((item: IDatas) => (
-            <Col xs={24} sm={24} md={8} xl={6} className={s.cardContainer}>
-              <Card bodyStyle={{ padding: 0 }}>
-                <img loading="lazy" src={item.thumbnail} />
+      {loading ? (
+        <Row justify="center">
+          <Spin
+            indicator={
+              <LoadingOutlined style={{ fontSize: 40, color: "#000" }} spin />
+            }
+          />
+        </Row>
+      ) : (
+        <Row
+          gutter={[16, 16]}
+          className={s.cardsContainer}
+          justify="center"
+          wrap
+        >
+          {datas &&
+            datas.map((item: IDatas) => (
+              <Col xs={24} sm={24} md={8} xl={6} className={s.cardContainer}>
+                <Card bodyStyle={{ padding: 0 }}>
+                  <img loading="lazy" src={item.thumbnail} />
 
-                <h1 className={s.cardContainer_title}>{item.title}</h1>
+                  <h1 className={s.cardContainer_title}>{item.title}</h1>
 
-                <p className={s.cardContainer_shortDescription}>
-                  {item.short_description}
-                </p>
-
-                <div className={s.cardContainer_genre}>
-                  <h3>Genre:</h3>
                   <p className={s.cardContainer_shortDescription}>
-                    &nbsp;{item.genre}
+                    {item.short_description}
                   </p>
-                </div>
 
-                <Row className={s.cardContainer_buttons}>
-                  <Col md={12} sm={24} xs={24}>
-                    {item.isFavorite ? (
-                      <Button
-                        className={s.cardContainer_buttonsButtonRemove}
-                        type="primary"
-                        icon={<HeartFilled />}
-                        onClick={() => removeItemFromFavorites(item.id)}
-                      >
-                        Remove favorite
-                      </Button>
-                    ) : (
-                      <Button
-                        className={s.cardContainer_buttonsButton}
-                        type="primary"
-                        icon={<HeartFilled />}
-                        onClick={() => addItemToFavorites(item.id)}
-                      >
-                        Add to favorite
-                      </Button>
-                    )}
-                  </Col>
-                  <Col md={12} sm={24} xs={24}>
-                    <Link to="/" className={s.cardContainer_buttonsLink}>
-                      <Button
-                        type="default"
-                        icon={<ArrowRightOutlined />}
-                        className={s.cardContainer_buttonsLinkButton}
-                      >
-                        Read more
-                      </Button>
-                    </Link>
-                  </Col>
-                </Row>
-              </Card>
-            </Col>
-          ))}
-      </Row>
+                  <div className={s.cardContainer_genre}>
+                    <h3>Genre:</h3>
+                    <p className={s.cardContainer_shortDescription}>
+                      &nbsp;{item.genre}
+                    </p>
+                  </div>
+
+                  <Row className={s.cardContainer_buttons}>
+                    <Col md={12} sm={24} xs={24}>
+                      {item.isFavorite ? (
+                        <Button
+                          className={s.cardContainer_buttonsButtonRemove}
+                          type="primary"
+                          icon={<HeartFilled />}
+                          onClick={() => removeItemFromFavorites(item.id)}
+                        >
+                          Remove favorite
+                        </Button>
+                      ) : (
+                        <Button
+                          className={s.cardContainer_buttonsButton}
+                          type="primary"
+                          icon={<HeartFilled />}
+                          onClick={() => addItemToFavorites(item.id)}
+                        >
+                          Add to favorite
+                        </Button>
+                      )}
+                    </Col>
+                    <Col md={12} sm={24} xs={24}>
+                      <Link to="/" className={s.cardContainer_buttonsLink}>
+                        <Button
+                          type="default"
+                          icon={<ArrowRightOutlined />}
+                          className={s.cardContainer_buttonsLinkButton}
+                        >
+                          Read more
+                        </Button>
+                      </Link>
+                    </Col>
+                  </Row>
+                </Card>
+              </Col>
+            ))}
+        </Row>
+      )}
     </Layout>
   );
 }
