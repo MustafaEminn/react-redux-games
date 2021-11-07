@@ -1,4 +1,6 @@
 .container {
-  max-width: 98vw;
+  width: calc(100% - 1.5rem);
+  max-width: 1920px;
+  overflow-x: hidden;
   margin: 0 auto;
 }
