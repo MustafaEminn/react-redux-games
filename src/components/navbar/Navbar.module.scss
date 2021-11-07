@@ -1,4 +1,44 @@
+@import "../../styles/mediaQueries.scss";
+@import "../../styles/zIndex.scss";
 .container {
   padding: 10px;
-  border-bottom: 1px solid var(--dark-grey2);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  border-bottom: 2px solid lightgray;
+  z-index: var(--z-navbar);
+  width: 100%;
+  background: white;
+
+  & .containerRight {
+    & .containerRight_link {
+      font-size: 19px;
+      margin: 0 15px;
+      color: black;
+    }
+
+    & .containerRight_bars {
+      display: none;
+      font-size: 25px;
+      margin: 0 15px;
+      color: black;
+      background: none;
+      border: none;
+      outline: none;
+      cursor: pointer;
+    }
+  }
+
+  @include MQMax500 {
+    & .containerRight {
+      & .containerRight_link {
+        display: none;
+      }
+
+      & .containerRight_bars {
+        display: initial;
+      }
+    }
+  }
 }
