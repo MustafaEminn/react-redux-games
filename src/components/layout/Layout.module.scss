@@ -1,6 +1,12 @@
 .container {
   width: calc(100% - 1.5rem);
+  height: 100%;
   max-width: 1920px;
   overflow-x: hidden;
+  overflow-y: hidden;
   margin: 0 auto;
+}
+
+.children {
+  margin-top: 100px;
 }

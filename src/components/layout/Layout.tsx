@@ -1,5 +1,6 @@
 import LoadingView from "../loading/LoadingView";
 import Navbar from "../navbar/Navbar";
+import Sidebar from "../sidebar/Sidebar";
 import s from "./Layout.module.scss";
 
 interface ILayout {
@@ -13,7 +14,8 @@ function Layout({ children, loading = false }: ILayout) {
   ) : (
     <div className={s.container}>
       <Navbar />
-      {children}
+      <div className={s.children}>{children}</div>
+      <Sidebar />
     </div>
   );
 }
