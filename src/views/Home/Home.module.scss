@@ -1,3 +1,57 @@
 .containerFilter {
   display: flex;
 }
+
+.cardsContainer {
+  margin-top: 0.7rem;
+  --space-margin: 0.5rem;
+  & .cardContainer {
+    & img {
+      border-top-right-radius: 7px;
+      border-top-left-radius: 7px;
+      width: 100%;
+    }
+
+    & .cardContainer_title {
+      font-size: 1.5rem;
+      margin: 0 0 var(--space-margin) var(--space-margin) !important;
+    }
+
+    & .cardContainer_shortDescription {
+      font-size: 1rem;
+      height: 50px;
+      margin: 0 0 var(--space-margin) var(--space-margin) !important;
+      overflow: hidden;
+    }
+    & .cardContainer_genre {
+      display: flex;
+      margin: 0 0 0 var(--space-margin) !important;
+      height: 30px;
+    }
+    & .cardContainer_buttons {
+      display: flex;
+      margin-bottom: var(--space-margin);
+      & .cardContainer_buttonsButton {
+        width: calc(100% - 1rem);
+        margin: var(--space-margin);
+        background: #52c41a;
+        border-color: #52c41a;
+      }
+
+      & .cardContainer_buttonsButtonRemove {
+        width: calc(100% - 1rem);
+        margin: var(--space-margin);
+        background: #ff4d4f;
+        border-color: #ff4d4f;
+      }
+      & .cardContainer_buttonsLink {
+        width: calc(100% - (var(--space-margin) * 2));
+
+        & .cardContainer_buttonsLinkButton {
+          width: calc(100% - (var(--space-margin) * 2));
+          margin: 0.5rem;
+        }
+      }
+    }
+  }
+}

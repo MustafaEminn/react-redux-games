@@ -1,32 +1,51 @@
 import { useEffect, useState } from "react";
 
-import { Select, Form, Row, Col, Button, Card, Avatar } from "antd";
-import { HeartFilled, SearchOutlined } from "@ant-design/icons";
+import { Select, Form, Row, Col, Button, Card } from "antd";
+import {
+  ArrowRightOutlined,
+  HeartFilled,
+  MoreOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 
 import Layout from "../../components/layout/Layout";
 import s from "./Home.module.scss";
 import axios from "axios";
 import { BASE } from "../../config/base";
+import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
+import Item from "antd/lib/list/Item";
+
+interface IDatas {
+  id: number;
+  title: string;
+  thumbnail: string;
+  short_description: string;
+  game_url: string;
+  genre: string;
+  platform: string;
+  publisher: string;
+  developer: string;
+  release_date: string;
+  freetogame_profile_url: string;
+  isFavorite: boolean;
+}
+
+interface IFavorites {
+  gameId: number;
+  // Please use new Date().toLocaleDateString()
+  addedAt: string;
+}
 
 function HomeView() {
-  const [datas, setDatas] = useState<Array<IDatas>>();
+  const [datas, setDatas] = useState<Array<IDatas>>([]);
+  const [favorites, setFavorites] = useState<Array<IFavorites>>(
+    JSON.parse(localStorage.favorites) || []
+  );
+  const [pageLoading, setPageLoading] = useState<boolean>(true);
 
   const Option = Select.Option;
   const [form] = Form.useForm();
-
-  interface IDatas {
-    id: number;
-    title: string;
-    thumbnail: string;
-    short_description: string;
-    game_url: string;
-    genre: string;
-    platform: string;
-    publisher: string;
-    developer: string;
-    release_date: string;
-    freetogame_profile_url: string;
-  }
 
   const categories = [
     "Mmorpg",
@@ -80,15 +99,85 @@ function HomeView() {
     let values = form.getFieldsValue();
   };
 
-  useEffect(() => {
-    axios.get(BASE.GAMES_API_URL).then((res) => {
-      setDatas(res.data);
-      console.log(res.data);
+  const concatDataAndFavorites = (
+    datasArg: Array<IDatas>,
+    favoritesArg: Array<IFavorites>
+  ) => {
+    // I mapping favorites every datas map becuase favorites usually small than datas.
+    let newDataWithFavorites = datasArg.map((itemData: IDatas) => {
+      let isGameAddedToFavorite = false;
+      favoritesArg.map((itemFavorite: IFavorites) => {
+        itemFavorite.gameId === itemData.id
+          ? (isGameAddedToFavorite = true)
+          : void 0;
+        return;
+      });
+
+      return { ...itemData, isFavorite: isGameAddedToFavorite };
     });
+    return newDataWithFavorites;
+  };
+
+  useEffect(() => {
+    if (!localStorage.favorites) {
+      localStorage.favorites = JSON.stringify([]);
+    }
+    axios
+      .get(BASE.GAMES_API_URL)
+      .then((res) => {
+        let newDataWithFavorites = concatDataAndFavorites(
+          res.data as Array<IDatas>,
+          favorites
+        );
+        setDatas(newDataWithFavorites);
+        setPageLoading(false);
+      })
+      .catch((err) => {
+        console.log(err);
+        toast.error(
+          "We got error when data fetching. Please refresh the page."
+        );
+      });
   }, []);
 
+  const addItemToFavorites = (gameId: Readonly<number>) => {
+    let isGameAddedBeforeToFavorites = false;
+    // I using spread operator because when I update the state don't update because of detect same data.
+    favorites.map((item: IFavorites, index: number) => {
+      return item.gameId === gameId
+        ? (isGameAddedBeforeToFavorites = true)
+        : void 0;
+    });
+
+    let newFavorites = [...favorites];
+
+    if (!isGameAddedBeforeToFavorites) {
+      newFavorites.push({
+        gameId: gameId,
+        addedAt: new Date().toLocaleDateString(),
+      });
+    }
+
+    localStorage.favorites = JSON.stringify(newFavorites);
+    setFavorites(newFavorites);
+
+    let newData = concatDataAndFavorites(datas, newFavorites);
+    setDatas(newData);
+  };
+  const removeItemFromFavorites = (gameId: Readonly<number>) => {
+    let newFavorites = favorites.filter((item: IFavorites, index: number) => {
+      return item.gameId !== gameId;
+    });
+
+    localStorage.favorites = JSON.stringify(newFavorites);
+    setFavorites(newFavorites);
+
+    let newData = concatDataAndFavorites(datas, newFavorites);
+    setDatas(newData);
+  };
+
   return (
-    <Layout>
+    <Layout loading={pageLoading}>
       <Form
         onFinish={() => onFilter()}
         form={form}
@@ -184,7 +273,64 @@ function HomeView() {
         </Row>
       </Form>
 
-      <Row>{datas && datas.map((item: any) => <Col md={8}></Col>)}</Row>
+      <Row gutter={[16, 16]} className={s.cardsContainer} justify="center" wrap>
+        {datas &&
+          datas.map((item: IDatas) => (
+            <Col xs={24} sm={24} md={8} xl={6} className={s.cardContainer}>
+              <Card bodyStyle={{ padding: 0 }}>
+                <img loading="lazy" src={item.thumbnail} />
+
+                <h1 className={s.cardContainer_title}>{item.title}</h1>
+
+                <p className={s.cardContainer_shortDescription}>
+                  {item.short_description}
+                </p>
+
+                <div className={s.cardContainer_genre}>
+                  <h3>Genre:</h3>
+                  <p className={s.cardContainer_shortDescription}>
+                    &nbsp;{item.genre}
+                  </p>
+                </div>
+
+                <Row className={s.cardContainer_buttons}>
+                  <Col md={12} sm={24} xs={24}>
+                    {item.isFavorite ? (
+                      <Button
+                        className={s.cardContainer_buttonsButtonRemove}
+                        type="primary"
+                        icon={<HeartFilled />}
+                        onClick={() => removeItemFromFavorites(item.id)}
+                      >
+                        Remove favorite
+                      </Button>
+                    ) : (
+                      <Button
+                        className={s.cardContainer_buttonsButton}
+                        type="primary"
+                        icon={<HeartFilled />}
+                        onClick={() => addItemToFavorites(item.id)}
+                      >
+                        Add to favorite
+                      </Button>
+                    )}
+                  </Col>
+                  <Col md={12} sm={24} xs={24}>
+                    <Link to="/" className={s.cardContainer_buttonsLink}>
+                      <Button
+                        type="default"
+                        icon={<ArrowRightOutlined />}
+                        className={s.cardContainer_buttonsLinkButton}
+                      >
+                        Read more
+                      </Button>
+                    </Link>
+                  </Col>
+                </Row>
+              </Card>
+            </Col>
+          ))}
+      </Row>
     </Layout>
   );
 }
