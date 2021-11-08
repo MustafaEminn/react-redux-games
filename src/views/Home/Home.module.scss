@@ -30,6 +30,13 @@
       display: flex;
       margin: 0 0 0 var(--space-margin) !important;
       height: 30px;
+
+      & p {
+        font-size: 1rem;
+        height: 50px;
+        margin: 0 0 var(--space-margin) var(--space-margin) !important;
+        overflow: hidden;
+      }
     }
     & .cardContainer_buttons {
       display: flex;

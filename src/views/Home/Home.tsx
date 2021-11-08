@@ -14,6 +14,7 @@ import axios from "axios";
 import { BASE } from "../../config/base";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
+import slug from "slug";
 
 interface IDatas {
   id: number;
@@ -326,12 +327,22 @@ function HomeView() {
           wrap
         >
           {datas &&
-            datas.map((item: IDatas) => (
-              <Col xs={24} sm={24} md={8} xl={6} className={s.cardContainer}>
+            datas.map((item: IDatas, index: number) => (
+              <Col
+                key={index}
+                xs={24}
+                sm={24}
+                md={8}
+                xl={6}
+                className={s.cardContainer}
+              >
                 <Card bodyStyle={{ padding: 0 }}>
-                  <img loading="lazy" src={item.thumbnail} />
-
-                  <h1 className={s.cardContainer_title}>{item.title}</h1>
+                  <Link to={`/${slug(item.title)}/${item.id}`}>
+                    <img loading="lazy" src={item.thumbnail} />
+                  </Link>
+                  <Link to={`/${slug(item.title)}/${item.id}`}>
+                    <h1 className={s.cardContainer_title}>{item.title}</h1>
+                  </Link>
 
                   <p className={s.cardContainer_shortDescription}>
                     {item.short_description}
@@ -339,9 +350,7 @@ function HomeView() {
 
                   <div className={s.cardContainer_genre}>
                     <h3>Genre:</h3>
-                    <p className={s.cardContainer_shortDescription}>
-                      &nbsp;{item.genre}
-                    </p>
+                    <p>&nbsp;{item.genre}</p>
                   </div>
 
                   <Row className={s.cardContainer_buttons}>
@@ -367,7 +376,10 @@ function HomeView() {
                       )}
                     </Col>
                     <Col md={12} sm={24} xs={24}>
-                      <Link to="/" className={s.cardContainer_buttonsLink}>
+                      <Link
+                        to={`/${slug(item.title)}/${item.id}`}
+                        className={s.cardContainer_buttonsLink}
+                      >
                         <Button
                           type="default"
                           icon={<ArrowRightOutlined />}
