@@ -40,7 +40,7 @@ interface IFavorites {
 function HomeView() {
   const [datas, setDatas] = useState<Array<IDatas>>([]);
   const [favorites, setFavorites] = useState<Array<IFavorites>>(
-    JSON.parse(localStorage.favorites) || []
+    (localStorage.favorites && JSON.parse(localStorage.favorites)) || []
   );
   const [pageLoading, setPageLoading] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
