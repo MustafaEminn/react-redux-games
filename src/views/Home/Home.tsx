@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Select, Form, Row, Col, Button, Card, Spin, Space } from "antd";
+import { Select, Form, Row, Col, Button, Card, Spin } from "antd";
 import {
   ArrowRightOutlined,
   HeartFilled,
@@ -15,27 +15,9 @@ import { BASE } from "../../config/base";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import slug from "slug";
-
-interface IDatas {
-  id: number;
-  title: string;
-  thumbnail: string;
-  short_description: string;
-  game_url: string;
-  genre: string;
-  platform: string;
-  publisher: string;
-  developer: string;
-  release_date: string;
-  freetogame_profile_url: string;
-  isFavorite: boolean;
-}
-
-interface IFavorites {
-  gameId: number;
-  // Please use new Date().toLocaleDateString()
-  addedAt: string;
-}
+import { IFavorites } from "../../types/favorites";
+import { IDatas } from "../../types/datas";
+import { concatDataAndFavorites } from "../../utils/concats";
 
 function HomeView() {
   const [datas, setDatas] = useState<Array<IDatas>>([]);
@@ -95,25 +77,6 @@ function HomeView() {
     "Horror",
     "Mmorts",
   ];
-
-  const concatDataAndFavorites = (
-    datasArg: Array<IDatas>,
-    favoritesArg: Array<IFavorites>
-  ) => {
-    // I mapping favorites every datas map becuase favorites usually small than datas.
-    let newDataWithFavorites = datasArg.map((itemData: IDatas) => {
-      let isGameAddedToFavorite = false;
-      favoritesArg.map((itemFavorite: IFavorites) => {
-        itemFavorite.gameId === itemData.id
-          ? (isGameAddedToFavorite = true)
-          : void 0;
-        return;
-      });
-
-      return { ...itemData, isFavorite: isGameAddedToFavorite };
-    });
-    return newDataWithFavorites;
-  };
 
   const onFilter = () => {
     let values = filterForm.getFieldsValue();
