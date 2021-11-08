@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { Row, Col, Card, Spin, Button } from "antd";
+import { Row, Col, Card, Spin, Button, Empty, Space } from "antd";
 import {
   ArrowRightOutlined,
   HeartFilled,
@@ -66,6 +66,10 @@ function FavoritesView() {
       localStorage.favorites = JSON.stringify([]);
     }
 
+    if (favorites.length === 0) {
+      setPageLoading(false);
+    }
+
     let newDatas: Array<IDatas> = [];
     let getGameRunCount: number = 0;
     let getGame = (gameId: number, index: number) => {
@@ -128,6 +132,12 @@ function FavoritesView() {
           justify="start"
           wrap
         >
+          {favorites.length === 0 && (
+            <Empty
+              className={s.empty}
+              description="You has not favorite game."
+            />
+          )}
           {datas &&
             datas.map((item: IDatas, index: number) => (
               <Col
